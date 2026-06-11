@@ -30,6 +30,7 @@ router.post('/', validate(userSchema), async (req, res, next) => {
     } catch (error) {
         next(error);
     }
+    
 });
 
 router.get('/', async (req, res, next) => {
