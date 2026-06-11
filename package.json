@@ -1,0 +1,30 @@
+{
+  "name": "api-cadastro-veiculos",
+  "version": "1.0.0",
+  "description": "API REST para cadastro e gerenciamento de veículos",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "setup": "node create-structure.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "api",
+    "veiculos",
+    "cadastro",
+    "rest"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "dotenv": "^16.6.1",
+    "express": "^5.2.1",
+    "joi": "^17.13.3",
+    "mongodb": "^7.3.0",
+    "mongoose": "^9.7.0",
+    "nodemon": "^3.1.14"
+  }
+}
