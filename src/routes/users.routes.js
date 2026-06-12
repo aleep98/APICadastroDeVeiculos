@@ -1,7 +1,10 @@
 import { Router } from 'express';
 import validate from '../middleware/validation.js';
 import UserService from '../services/user.service.js';
+import User from '../models/User.js';
 import Joi from 'joi';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 
 const router = Router();
 
@@ -22,15 +25,43 @@ const userSchema = Joi.object({
 router.post('/', validate(userSchema), async (req, res, next) => {
     try {
         const usuario = await UserService.criar(req.body);
+        if (!JWT_SECRET) {
+            console.error('JWT_SECRET não definido');
+            return res.status(500).json({ success: false, message: 'Configuração do servidor inválida' });
+        }
+        const token = jwt.sign({ userId: usuario._id, email: usuario.email }, JWT_SECRET, { expiresIn: '1h' });
         res.status(201).json({
             success: true,
             message: 'Usuário cadastrado com sucesso!',
-            data: usuario
+            data: { user: usuario, token }
         });
     } catch (error) {
         next(error);
     }
-    
+
+});
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+router.post('/login', async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+        if (!JWT_SECRET) {
+            console.error('JWT_SECRET não definido em process.env');
+            return res.status(500).json({ message: 'Configuração do servidor inválida' });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) return res.status(401).json({ message: 'Usuário não encontrado' });
+
+        const senhaCorreta = await bcrypt.compare(password, user.password);
+        if (!senhaCorreta) return res.status(401).json({ message: 'Senha incorreta' });
+
+        const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+        res.json({ message: 'Login bem-sucedido', token });
+    } catch (error) {
+        next(error);
+    }
 });
 
 router.get('/', async (req, res, next) => {

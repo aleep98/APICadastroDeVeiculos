@@ -5,8 +5,6 @@ class UserService {
     async criar(dados) {
         const usuarioExistente = await User.findOne({ email: dados.email });
 
-
-
         if (usuarioExistente) {
             const error = new Error('Usuário com este email já cadastrado');
             error.statusCode = 400;

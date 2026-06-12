@@ -2,6 +2,7 @@ import { Router } from 'express';
 import validate from '../middleware/validation.js';
 import VeiculoService from '../services/veiculo.service.js';
 import Joi from 'joi';
+import tokenValidator from '../middleware/tokenValidator.js';
 
 const router = Router();
 
@@ -34,7 +35,7 @@ router.post('/', validate(veiculoSchema), async (req, res, next) => {
     }
 });
 
-router.get('/', async (req, res, next) => {
+router.get('/', tokenValidator, async (req, res, next) => {
     try {
         const veiculos = await VeiculoService.listar();
         res.json({
@@ -44,6 +45,7 @@ router.get('/', async (req, res, next) => {
     } catch (error) {
         next(error);
     }
+    console.log("Usuário que fez a requisição:", req.usuarioLogado);
 });
 
 router.get('/:id', async (req, res, next) => {
