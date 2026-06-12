@@ -31,10 +31,7 @@ class VeiculoService {
     }
 
     async atualizar(id, dados) {
-        const veiculo = await Veiculo.findByIdAndUpdate(id, dados, {
-            new: true,
-            runValidators: true
-        });
+       const veiculo = await Veiculo.findByIdAndUpdate(id, dados, { returnDocument: 'after', runValidators: true })
 
         if (!veiculo) {
             const error = new Error('Veículo não encontrado');

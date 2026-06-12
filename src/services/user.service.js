@@ -45,7 +45,7 @@ class UserService {
             }
 
         }
-        const usuario = await User.findByIdAndUpdate(id, dados, { new: true, runValidators: true }).select('-password');
+        const usuario = await User.findByIdAndUpdate(id, dados, { returnDocument: 'after', runValidators: true }).select('-password');
         if (!usuario) { const error = new Error('Usuário não encontrado'); error.statusCode = 404; throw error; }
         return usuario;
 
