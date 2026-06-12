@@ -5,6 +5,9 @@ import User from '../models/User.js';
 import Joi from 'joi';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import RefreshToken from '../models/RefreshToken.js';
+import { getJwtSecret } from '../config/secretsManager.js';
+import crypto from 'crypto';
 
 const router = Router();
 
@@ -22,18 +25,39 @@ const userSchema = Joi.object({
     })
 });
 
+// Register - agora gera access token e refresh token (cookie HttpOnly)
 router.post('/', validate(userSchema), async (req, res, next) => {
     try {
         const usuario = await UserService.criar(req.body);
+
+        const JWT_SECRET = await getJwtSecret();
         if (!JWT_SECRET) {
             console.error('JWT_SECRET não definido');
             return res.status(500).json({ success: false, message: 'Configuração do servidor inválida' });
         }
-        const token = jwt.sign({ userId: usuario._id, email: usuario.email }, JWT_SECRET, { expiresIn: '1h' });
+
+        // access token
+        const accessToken = jwt.sign({ userId: usuario._id, email: usuario.email }, JWT_SECRET, { expiresIn: '1h' });
+
+        // refresh token (rotacionável)
+        const refreshToken = crypto.randomBytes(64).toString('hex');
+        const refreshTokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 dias
+
+        await RefreshToken.create({ user: usuario._id, tokenHash: refreshTokenHash, expiresAt });
+
+        // envia cookie seguro (HttpOnly)
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
         res.status(201).json({
             success: true,
             message: 'Usuário cadastrado com sucesso!',
-            data: { user: usuario, token }
+            data: { user: usuario, accessToken }
         });
     } catch (error) {
         next(error);
@@ -41,13 +65,13 @@ router.post('/', validate(userSchema), async (req, res, next) => {
 
 });
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
+// Login - gera access + refresh token
 router.post('/login', async (req, res, next) => {
     try {
         const { email, password } = req.body;
+        const JWT_SECRET = await getJwtSecret();
         if (!JWT_SECRET) {
-            console.error('JWT_SECRET não definido em process.env');
+            console.error('JWT_SECRET não definido');
             return res.status(500).json({ message: 'Configuração do servidor inválida' });
         }
 
@@ -57,12 +81,35 @@ router.post('/login', async (req, res, next) => {
         const senhaCorreta = await bcrypt.compare(password, user.password);
         if (!senhaCorreta) return res.status(401).json({ message: 'Senha incorreta' });
 
-        const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
-        res.json({ message: 'Login bem-sucedido', token });
+        const accessToken = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+
+        const refreshToken = crypto.randomBytes(64).toString('hex');
+        const refreshTokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        await RefreshToken.create({ user: user._id, tokenHash: refreshTokenHash, expiresAt });
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        res.json({ message: 'Login bem-sucedido', accessToken });
     } catch (error) {
         next(error);
     }
 });
+
+router.post('/logout', async (req, res, next) => {
+    try {
+        const { token } = req.body;
+        if (!token) return res.status(400).json({ message: 'Token não fornecido' });
+
+    }catch (error) {
+        next(error);
+    }
+    })
 
 router.get('/', async (req, res, next) => {
     try {

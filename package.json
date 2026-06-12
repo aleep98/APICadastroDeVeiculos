@@ -19,15 +19,19 @@
   "author": "Your Name",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.379.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "chalk": "^5.6.2",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.3.0",
     "mongoose": "^9.7.0",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "swagger": "^0.7.5",
+    "swagger-ui-express": "^4.6.3"
   }
 }
