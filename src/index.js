@@ -19,7 +19,7 @@ app.use(cookieParser()); // necessário para ler cookies (refresh token)
 connectDB();
 
 // Swagger UI - serve documentação OpenAPI
-const openapiPath = path.join(new URL('.', import.meta.url).pathname, 'config', 'openapi.json');
+const openapiPath = path.join(process.cwd(), "src", "config", "openapi.json");
 let swaggerDocument = {};
 try {
   const raw = fs.readFileSync(openapiPath, 'utf-8');
