@@ -43,18 +43,20 @@
         "responses": { "200": { "description": "OK" } }
       }
     },
-    "/users": {
+    "/auth/register": {
       "post": {
         "summary": "Register user (creates access + refresh tokens)",
         "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } },
         "responses": { "201": { "description": "Created" } }
-      },
+      }
+    },
+    "/users": {
       "get": {
         "summary": "List users",
         "responses": { "200": { "description": "OK" } }
       }
     },
-    "/users/login": {
+    "/auth/login": {
       "post": {
         "summary": "Login (returns access token and sets refresh cookie)",
         "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "properties": { "email": { "type": "string" }, "password": { "type": "string" } }, "required": ["email","password"] } } } },

@@ -21,8 +21,8 @@ API REST simples para gerenciar veículos e usuários (veículos, usuários, aut
 
 ## Endpoints principais
 - GET /health - para testes
-- POST /users — registrar (gera access token + refresh token cookie)
-- POST /users/login — autenticar (gera access + refresh)
+- POST /auth/register — registrar (gera access token + refresh token cookie)
+- POST /auth/login — autenticar (gera access + refresh)
 - GET /users, GET /users/:id, PUT /users/:id, DELETE /users/:id
 - POST /auth/refresh — troca refresh token por novo access token
 - POST /auth/logout — revoga refresh token e limpa cookie

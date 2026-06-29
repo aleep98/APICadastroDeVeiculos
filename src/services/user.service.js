@@ -49,9 +49,6 @@ class UserService {
         if (!usuario) { const error = new Error('Usuário não encontrado'); error.statusCode = 404; throw error; }
         return usuario;
 
-
-
-        return usuario;
     }
 
     async deletar(id) {

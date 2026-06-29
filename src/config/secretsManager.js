@@ -19,7 +19,6 @@ export async function getJwtSecret() {
       }
     } catch (err) {
       console.error('Erro ao obter secret do AWS Secrets Manager:', err.message || err);
-      // fallthrough to env var
     }
   }
 
